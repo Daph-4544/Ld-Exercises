@@ -1,0 +1,52 @@
+import time
+
+def count_slices_with_sum(A, S):
+    """
+    Function to count the number of slices in array A whose sum is S
+    using a sliding window technique.
+    """
+    n = len(A)
+    count = 0
+    current_sum = 0
+    left = 0
+
+    # Sliding window approach
+    for right in range(n):
+        current_sum += A[right]
+
+        # Shrink the window if current_sum exceeds S
+        while current_sum > S and left <= right:
+            current_sum -= A[left]
+            left += 1
+
+        # If the sum matches S, count the slice
+        if current_sum == S:
+            count += 1
+
+    return count
+
+# Function to measure execution time for different sizes of N
+def test_algorithm(A, S):
+    start_time = time.time()
+    result = count_slices_with_sum(A, S)
+    end_time = time.time()
+
+    time_taken = (end_time - start_time) * 1000  # Convert time to milliseconds
+    print(f"Array Size: {len(A)}, Slices Count: {result}, Time Taken: {time_taken:.2f} ms")
+
+# Example arrays
+A_10 = [2, 4, 3, 2, 1, 1, 5, 7]
+A_100 = [i % 100 + 1 for i in range(100)]  # Array with numbers from 1 to 100
+A_1000 = [i % 100 + 1 for i in range(1000)]  # Array with numbers from 1 to 100
+
+S = 7
+
+# Test with different sizes
+print("Testing with N = 10")
+test_algorithm(A_10, S)
+
+print("\nTesting with N = 100")
+test_algorithm(A_100, S)
+
+print("\nTesting with N = 1000")
+test_algorithm(A_1000, S)
