@@ -1,0 +1,32 @@
+import time
+# Optimized function to find all primes less than N using the Sieve of Eratosthenes
+def sieve_of_eratosthenes(N):
+    sieve = [True] * N
+    sieve[0] = sieve[1] = False  # 0 and 1 are not prime numbers
+    p = 2
+    while p * p < N:
+        if sieve[p]:
+            for i in range(p * p, N, p):
+                sieve[i] = False
+        p += 1
+    # Collecting all prime numbers
+    primes = [p for p, is_prime in enumerate(sieve) if is_prime]
+    return primes
+
+# Function to time the execution
+def print_primes_and_time(N):
+    start_time = time.time()  # Start the timer
+    primes = sieve_of_eratosthenes(N)
+    end_time = time.time()  # End the timer
+    
+    # Print the primes
+    print(f"Prime numbers less than {N}: {primes}")
+    
+    # Calculate time taken in milliseconds
+    time_taken = (end_time - start_time) * 1000
+    print(f"Time taken: {time_taken:.2f} ms\n")
+
+# Test for N = 100, 500, 1000
+print_primes_and_time(100)
+print_primes_and_time(500)
+print_primes_and_time(1000)
