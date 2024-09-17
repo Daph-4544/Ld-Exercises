@@ -1,0 +1,101 @@
+import pytz
+from datetime import datetime, timedelta
+
+def convert_to_utc(time_str, timezone):
+    """Converts a time range string in a specific timezone to UTC."""
+    local = pytz.timezone(timezone)
+    time_obj = datetime.strptime(time_str, "%I:%M %p")
+    local_dt = local.localize(time_obj, is_dst=None)
+    utc_dt = local_dt.astimezone(pytz.utc)
+    return utc_dt
+
+def find_time_overlap(person1_start, person1_end, tz1, person2_start, person2_end, tz2):
+    """Finds overlapping availability for two persons in different timezones and prints it."""
+    # Convert person 1 times to UTC
+    person1_start_utc = convert_to_utc(person1_start, tz1)
+    person1_end_utc = convert_to_utc(person1_end, tz1)
+    
+    # Convert person 2 times to UTC
+    person2_start_utc = convert_to_utc(person2_start, tz2)
+    person2_end_utc = convert_to_utc(person2_end, tz2)
+    
+    # Find the overlap in UTC
+    overlap_start = max(person1_start_utc, person2_start_utc)
+    overlap_end = min(person1_end_utc, person2_end_utc)
+    
+    if overlap_start < overlap_end:
+        # Convert overlap times back to both timezones
+        overlap_start_tz1 = overlap_start.astimezone(pytz.timezone(tz1))
+        overlap_end_tz1 = overlap_end.astimezone(pytz.timezone(tz1))
+        
+        overlap_start_tz2 = overlap_start.astimezone(pytz.timezone(tz2))
+        overlap_end_tz2 = overlap_end.astimezone(pytz.timezone(tz2))
+        
+        # Print the results
+        print(f"Both persons are available in:")
+        print(f"{overlap_start_tz1.strftime('%I:%M %p')} - {overlap_end_tz1.strftime('%I:%M %p')} {tz1}")
+        print(f"{overlap_start_tz2.strftime('%I:%M %p')} - {overlap_end_tz2.strftime('%I:%M %p')} {tz2}")
+        print(f"{overlap_start.strftime('%I:%M %p')} - {overlap_end.strftime('%I:%M %p')} UTC")
+    else:
+        # No intersection
+        print(f"No intersecting time available between Person 1 and Person 2.")
+        
+        # Print the time ranges in both timezones and UTC
+        person1_start_utc = person1_start_utc.strftime('%I:%M %p UTC')
+        person1_end_utc = person1_end_utc.strftime('%I:%M %p UTC')
+        person2_start_utc = person2_start_utc.strftime('%I:%M %p UTC')
+        person2_end_utc = person2_end_utc.strftime('%I:%M %p UTC')
+        
+        print(f"Person 1 availability: {person1_start} - {person1_end} {tz1} ({person1_start_utc} - {person1_end_utc})")
+        print(f"Person 2 availability: {person2_start} - {person2_end} {tz2} ({person2_start_utc} - {person2_end_utc})")
+
+def find_weekly_overlap(person1_availability, person2_availability, tz1, tz2):
+    """Finds overlapping availability for two persons for each day of the week."""
+    days_of_week = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    
+    for i in range(7):
+        day = days_of_week[i]
+        person1_start, person1_end = person1_availability[i]
+        person2_start, person2_end = person2_availability[i]
+        
+        print(f"{day}:")
+        find_time_overlap(person1_start, person1_end, tz1, person2_start, person2_end, tz2)
+        print("====================================================")
+
+# Example for Part (a): Single day availability
+print("Single Day Availability:")
+person1_start = "6:30 AM"
+person1_end = "3:30 PM"
+person1_tz = "America/Los_Angeles"  # Pacific Time
+
+person2_start = "8:30 AM"
+person2_end = "4:30 PM"
+person2_tz = "Europe/London"  # London Time
+
+find_time_overlap(person1_start, person1_end, person1_tz, person2_start, person2_end, person2_tz)
+print("\n====================================================\n")
+
+# Example for Part (b): Weekly availability
+print("Weekly Availability:")
+person1_weekly = [
+    ("6:30 AM", "3:30 PM"),  # Sunday
+    ("6:30 AM", "3:30 PM"),  # Monday
+    ("6:30 AM", "3:30 PM"),  # Tuesday
+    ("6:30 AM", "3:30 PM"),  # Wednesday
+    ("6:30 AM", "3:30 PM"),  # Thursday
+    ("6:30 AM", "3:30 PM"),  # Friday
+    ("6:30 AM", "3:30 PM")   # Saturday
+]
+
+person2_weekly = [
+    ("8:30 AM", "4:30 PM"),  # Sunday
+    ("8:30 AM", "4:30 PM"),  # Monday
+    ("8:30 AM", "4:30 PM"),  # Tuesday
+    ("8:30 AM", "4:30 PM"),  # Wednesday
+    ("8:30 AM", "4:30 PM"),  # Thursday
+    ("8:30 AM", "4:30 PM"),  # Friday
+    ("8:30 AM", "4:30 PM")   # Saturday
+]
+
+# Find and print weekly overlap
+find_weekly_overlap(person1_weekly, person2_weekly, person1_tz, person2_tz)
